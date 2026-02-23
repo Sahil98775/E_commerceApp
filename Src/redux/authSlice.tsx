@@ -35,6 +35,27 @@ const initialProfileState: ProfileState = {
   image: null,
 };
 
+type FavouriteItem = {
+  id: number;
+  title: string;
+  price: number;
+  discountPercentage: number;
+  thumbnail: string;
+  description: string;
+  rating: number;
+  stock: number;
+  availabilityStatus: string;
+  weight: number;
+};
+
+interface FavouriteState {
+  items: FavouriteItem[];
+}
+
+const initialFavouriteState: FavouriteState = {
+  items: [],
+};
+
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -87,11 +108,41 @@ const profileSlice = createSlice({
   },
 });
 
+const favouriteSlice = createSlice({
+  name: "favourite",
+  initialState: initialFavouriteState,
+  reducers: {
+    addToFavourites: (state, action: PayloadAction<FavouriteItem>) => {
+      state.items.push(action.payload);
+    },
+    removeFromFavourites: (state, action) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+    },
+
+    toggleFavourite: (state, action: PayloadAction<FavouriteItem>) => {
+      const existingItem = state.items.find(
+        (item) => item.id === action.payload.id
+      );
+      if (existingItem) {
+        state.items = state.items.filter(
+          (item) => item.id !== action.payload.id
+        );
+      } else {
+        state.items.push(action.payload);
+      }
+    },
+  },
+});
+
 export const { register, login, logout } = authSlice.actions;
-export default authSlice.reducer;
+export const authReducer = authSlice.reducer;
 
 export const { toggleTheme } = themeSlice.actions;
 export const themeReducer = themeSlice.reducer;
 
 export const { setProfile } = profileSlice.actions;
 export const profileReducer = profileSlice.reducer;
+
+export const { addToFavourites, removeFromFavourites, toggleFavourite } =
+  favouriteSlice.actions;
+export const favouriteReducer = favouriteSlice.reducer;

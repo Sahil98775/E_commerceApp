@@ -1,20 +1,31 @@
-import { View, Text, Image, Touchable, TouchableOpacity } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useRoute } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import RatingStars from "../../Component/Rating";
 import { Ionicons } from "@expo/vector-icons";
+import { toggleFavourite } from "../../redux/authSlice";
+import { lightTheme, darkTheme } from "../../util/theme";
 const ProductDetail = () => {
   const Route = useRoute();
   const { product } = Route.params as any;
+  const dispatch = useDispatch();
+  const favourites = useSelector((state: RootState) => state.favourite.items);
+  const isFavourite = favourites.some((fav) => fav.id === product.id);
+  const themeMode = useSelector((state: RootState) => state.theme.mode);
+  const theme = themeMode === "light" ? lightTheme : darkTheme;
   return (
-    <View style={{ padding: 18 }}>
-      <Ionicons
-        name="share-social-outline"
-        size={33}
-        color={"#D97A2B"}
-        style={{ position: "absolute", right: 10, top: 10 }}
-      />
+    <ScrollView style={{ padding: 18, backgroundColor: theme.background }}>
+      <TouchableOpacity
+        onPress={() => dispatch(toggleFavourite(product))}
+        style={{ position: "relative", left: "90%" }}
+      >
+        <Ionicons
+          name={isFavourite ? "heart" : "heart-outline"}
+          size={30}
+          color={isFavourite ? "#D97A2B" : "grey"}
+        />
+      </TouchableOpacity>
       <Image
         source={{ uri: product.thumbnail }}
         style={{ width: "100%", height: 400, resizeMode: "contain" }}
@@ -29,9 +40,11 @@ const ProductDetail = () => {
           style={{
             justifyContent: "flex-start",
             alignItems: "center",
+            width: "60%",
           }}
         >
           <Text
+            numberOfLines={3}
             style={{
               fontSize: 25,
               fontWeight: "600",
@@ -49,6 +62,7 @@ const ProductDetail = () => {
               fontSize: 30,
               fontWeight: "700",
               fontFamily: "Poppins-Bold",
+              color: theme.text,
             }}
           >
             ${product.price}
@@ -68,13 +82,23 @@ const ProductDetail = () => {
         }}
       >
         <RatingStars rating={product.rating} />
-        <Text>({product.reviews?.length || 0})</Text>
+        <Text style={{ color: theme.text }}>
+          ({product.reviews?.length || 0})
+        </Text>
       </View>
-      <Text style={{ fontSize: 17, fontFamily: "Inter-Regular" }}>
+      <Text
+        style={{ fontSize: 17, fontFamily: "Inter-Regular", color: theme.text }}
+      >
         {product.description}
       </Text>
       <View style={{ marginTop: 10 }}>
-        <Text style={{ fontSize: 20, fontWeight: 600, color: "green" }}>
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: 600,
+            color: product.stock > 0 ? "green" : "red",
+          }}
+        >
           {product.availabilityStatus}
         </Text>
         <Text
@@ -98,7 +122,7 @@ const ProductDetail = () => {
           borderRadius: 10,
           backgroundColor: "#D97A2B",
           borderColor: "#FFFFFF",
-          marginTop: 80,
+          marginTop: 40,
           marginLeft: 70,
         }}
       >
@@ -114,7 +138,7 @@ const ProductDetail = () => {
         </Text>
         <Ionicons name="cart" color={"#ffffff"} size={23} />
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 export default ProductDetail;

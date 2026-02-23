@@ -7,11 +7,14 @@ import ProfileScreen from "../Screens/profile/ProfileScreen";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { lightTheme, darkTheme } from "../util/theme";
-
+import { View, Text } from "react-native";
 const Tab = createBottomTabNavigator();
 const BottomTab = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
+  const favourites = useSelector((state: RootState) => state.favourite.items);
+
+  const wishlistCount = favourites.length;
 
   return (
     <Tab.Navigator
@@ -20,8 +23,13 @@ const BottomTab = () => {
         tabBarActiveTintColor: "#E17600",
         tabBarInactiveTintColor: "#E6D2B8",
         headerStyle: {
-          backgroundColor: theme.card,
+          backgroundColor: theme.header,
         },
+        headerTitleStyle: {
+          fontSize: 30,
+          fontWeight: "700",
+        },
+
         headerTintColor: theme.text,
         tabBarStyle: {
           paddingTop: 7,
@@ -34,6 +42,28 @@ const BottomTab = () => {
         name="Home"
         component={HomeScreen}
         options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontSize: 32,
+                  fontFamily: "Poppins-Bold",
+                  fontWeight: "700",
+                  color: theme.text,
+                }}
+              >
+                Fastket
+              </Text>
+              <Ionicons
+                name="rocket"
+                size={28}
+                color="#DD7500"
+                style={{ marginRight: 6 }}
+              />
+            </View>
+          ),
+          headerTitleAlign: "center",
+
           tabBarIcon: ({ color }) => (
             <Ionicons name="home" color={color} size={32} />
           ),
@@ -43,6 +73,27 @@ const BottomTab = () => {
         name="Cart"
         component={CartScreen}
         options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontSize: 32,
+                  fontFamily: "Poppins-Bold",
+                  fontWeight: "700",
+                  color: theme.text,
+                }}
+              >
+                MyCart
+              </Text>
+              <Ionicons
+                name="cart"
+                size={28}
+                color="#DD7500"
+                style={{ marginRight: 6 }}
+              />
+            </View>
+          ),
+          headerTitleAlign: "center",
           tabBarIcon: ({ color }) => (
             <Ionicons name="cart" color={color} size={33} />
           ),
@@ -53,8 +104,58 @@ const BottomTab = () => {
         name="WishList"
         component={WishListScreen}
         options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontSize: 32,
+                  fontFamily: "Poppins-Bold",
+                  fontWeight: "700",
+                  color: theme.text,
+                }}
+              >
+                MyWishList
+              </Text>
+              <Ionicons
+                name="heart"
+                size={28}
+                color="#DD7500"
+                style={{ marginRight: 6 }}
+              />
+            </View>
+          ),
+          headerTitleAlign: "center",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="heart" color={color} size={30} />
+            <View style={{ width: 30, height: 30 }}>
+              <Ionicons name="heart" color={color} size={30} />
+
+              {wishlistCount > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -10,
+                    backgroundColor: "red",
+                    borderRadius: 10,
+                    minWidth: 18,
+                    height: 18,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 10,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {wishlistCount > 99 ? "99+" : wishlistCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           ),
         }}
       />
@@ -62,6 +163,27 @@ const BottomTab = () => {
         name="Profile"
         component={ProfileScreen}
         options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontSize: 32,
+                  fontFamily: "Poppins-Bold",
+                  fontWeight: "700",
+                  color: theme.text,
+                }}
+              >
+                MyProfile
+              </Text>
+              <Ionicons
+                name="cart"
+                size={28}
+                color="#DD7500"
+                style={{ marginRight: 6 }}
+              />
+            </View>
+          ),
+          headerTitleAlign: "center",
           tabBarIcon: ({ color }) => (
             <Ionicons name="person" color={color} size={30} />
           ),

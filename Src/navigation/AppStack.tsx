@@ -16,7 +16,7 @@ const AppStack = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: theme.card },
+        headerStyle: { backgroundColor: theme.backcolor },
         headerTintColor: theme.text,
       }}
     >

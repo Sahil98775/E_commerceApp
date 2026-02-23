@@ -1,6 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
-import { themeReducer, profileReducer } from "./authSlice";
+import {
+  themeReducer,
+  profileReducer,
+  authReducer,
+  favouriteReducer,
+} from "./authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
 
@@ -22,12 +26,17 @@ const persistedProfileReducer = persistReducer(
   { ...persistConfig, key: "profile" },
   profileReducer
 );
+const persistedFavouriteReducer = persistReducer(
+  { ...persistConfig, key: "Favourite" },
+  favouriteReducer
+);
 
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     theme: persistedThemeReducer,
     profile: persistedProfileReducer,
+    favourite: favouriteReducer,
   },
 
   middleware: (getDefaultMiddleware) =>

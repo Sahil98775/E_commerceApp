@@ -6,12 +6,12 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState, useEffect } from "react";
-
+import { Ionicons } from "@expo/vector-icons";
 import styles from "./homeStyle";
 import { lightTheme, darkTheme } from "../../util/theme";
 import {
@@ -20,6 +20,7 @@ import {
   getProductsByCategory,
   getLatestProducts,
 } from "../../util/ProductsApi";
+import { toggleFavourite } from "../../redux/authSlice";
 type Product = {
   id: number;
   title: string;
@@ -42,6 +43,9 @@ type RootStackParamList = {
   ProductDetail: { product: Product };
 };
 const HomeScreen = () => {
+  const dispatch = useDispatch();
+  const favourites = useSelector((state: RootState) => state.favourite.items);
+
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
 
@@ -115,8 +119,8 @@ const HomeScreen = () => {
         { backgroundColor: theme.background },
       ]}
     >
-      <View style={[styles.categories, { backgroundColor: theme.card }]}>
-        <Text style={[styles.homeText, { color: theme.text }]}>categories</Text>
+      <View style={[styles.categories, { backgroundColor: theme.backcolor }]}>
+        <Text style={[styles.homeText, { color: theme.text }]}>Categories</Text>
 
         <FlatList
           data={categories}
@@ -132,14 +136,23 @@ const HomeScreen = () => {
               >
                 <TouchableOpacity
                   style={{
-                    borderWidth: 1,
+                    borderWidth: 2,
                     padding: 5,
                     margin: 5,
                     borderRadius: 10,
+                    borderColor: "#D97A2B",
                   }}
                   onPress={() => handleCategoryPress(item.slug)}
                 >
-                  <Text>{item.name}</Text>
+                  <Text
+                    style={{
+                      color: theme.cat,
+                      fontSize: 16,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {item.name}
+                  </Text>
                 </TouchableOpacity>
               </View>
             );
@@ -147,26 +160,46 @@ const HomeScreen = () => {
         />
       </View>
 
-      <View style={[styles.latest, { backgroundColor: theme.card }]}>
-        <Text style={[styles.homeText, { color: theme.text }]}>
-          Latest Product
+      <View style={[styles.latest, { backgroundColor: theme.background }]}>
+        <Text
+          style={[styles.homeText, { color: "#D97A2B", paddingHorizontal: 2 }]}
+        >
+          Newly added products
         </Text>
+
         <FlatList
           data={latestProduct}
           keyExtractor={(item) => item.id.toString()}
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
+            const isFavourite = favourites.some((fav) => fav.id === item.id);
             return (
-              <View
+              <TouchableOpacity
                 style={{
                   padding: 10,
                   margin: 10,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: theme.card,
                   borderRadius: 10,
                   elevation: 3,
                 }}
+                onPress={() =>
+                  navigation.navigate("ProductDetail", { product: item })
+                }
               >
+                <TouchableOpacity
+                  onPress={() => dispatch(toggleFavourite(item))}
+                >
+                  <Ionicons
+                    name={isFavourite ? "heart" : "heart-outline"}
+                    size={25}
+                    color={isFavourite ? "#D97A2B" : "grey"}
+                    style={{
+                      position: "relative",
+                      left: "80%",
+                    }}
+                  />
+                </TouchableOpacity>
                 <Image
                   source={{ uri: item.thumbnail }}
                   style={{
@@ -175,18 +208,37 @@ const HomeScreen = () => {
                     resizeMode: "contain",
                   }}
                 />
-                <Text>{item.title}</Text>
-                <Text>${item.price}</Text>
-                <Text>{item.discountPercentage}% OFF</Text>
-              </View>
+
+                <Text
+                  style={{ fontSize: 15, fontWeight: "600", color: "#D97A2B" }}
+                >
+                  {item.title}
+                </Text>
+                <Text style={{ fontWeight: "600", color: theme.text }}>
+                  ${item.price}
+                </Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginTop: 4,
+                  }}
+                >
+                  <Text style={{ color: "red", fontWeight: "700" }}>
+                    {item.discountPercentage}% OFF
+                  </Text>
+                  <TouchableOpacity>
+                    <Ionicons name="cart" color={"#D97A2B"} size={25} />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
             );
           }}
-        ></FlatList>
+        />
       </View>
-      <View style={[styles.allProduct, { backgroundColor: theme.card }]}>
-        <Text style={[styles.homeText, { color: theme.text }]}>
-          All Product
-        </Text>
+      <View style={[styles.allProduct, { backgroundColor: theme.product }]}>
+        <Text style={[styles.homeText, { color: theme.text }]}>Product</Text>
         <FlatList
           key="two-columns"
           data={products}
@@ -194,40 +246,105 @@ const HomeScreen = () => {
           numColumns={2}
           columnWrapperStyle={{
             justifyContent: "space-between",
-            paddingHorizontal: 8,
+            paddingHorizontal: 1,
           }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                margin: 6,
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                padding: 10,
-                elevation: 3,
-              }}
-              onPress={() =>
-                navigation.navigate("ProductDetail", { product: item })
-              }
-            >
-              <Image
-                source={{ uri: item.thumbnail }}
+          renderItem={({ item }) => {
+            const isFavourite = favourites.some((fav) => fav.id === item.id);
+            return (
+              <TouchableOpacity
                 style={{
-                  width: "100%",
-                  height: 150,
-                  resizeMode: "contain",
+                  flex: 1,
+                  margin: 6,
+                  backgroundColor: theme.card,
+                  borderRadius: 10,
+                  padding: 10,
+                  elevation: 3,
                 }}
-              />
-              <Text numberOfLines={2} style={{ fontWeight: "600" }}>
-                {item.title}
-              </Text>
+                onPress={() =>
+                  navigation.navigate("ProductDetail", { product: item })
+                }
+              >
+                <TouchableOpacity
+                  onPress={() => dispatch(toggleFavourite(item))}
+                  style={{
+                    position: "absolute",
+                    right: 10,
+                    top: 10,
+                    zIndex: 1,
+                  }}
+                >
+                  <Ionicons
+                    name={isFavourite ? "heart" : "heart-outline"}
+                    size={25}
+                    color={isFavourite ? "#D97A2B" : "grey"}
+                  />
+                </TouchableOpacity>
 
-              <Text>${item.price}</Text>
-              <Text style={{ color: "red" }}>
-                {item.discountPercentage}% OFF
-              </Text>
-            </TouchableOpacity>
-          )}
+                <Image
+                  source={{ uri: item.thumbnail }}
+                  style={{
+                    width: "100%",
+                    height: 150,
+                    resizeMode: "contain",
+                  }}
+                />
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    fontWeight: "600",
+                    fontSize: 18,
+                    marginBottom: 2,
+                    color: theme.text,
+                  }}
+                >
+                  {item.title}
+                </Text>
+
+                <Text style={{ fontSize: 15, marginBottom: 2, color: "grey" }}>
+                  ${item.price}
+                </Text>
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontWeight: "600",
+                    backgroundColor: "red",
+                    paddingLeft: 3,
+                    borderRadius: 5,
+                    width: "55%",
+                    marginTop: 6,
+                  }}
+                >
+                  {item.discountPercentage}% OFF
+                </Text>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderWidth: 2,
+                    width: "100%",
+                    padding: 5,
+                    borderRadius: 5,
+                    backgroundColor: "#D97A2B",
+                    borderColor: "#FFFFFF",
+                    marginTop: 15,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 15,
+                      fontWeight: "600",
+                      marginRight: 7,
+                      color: "#FFFFFF",
+                    }}
+                  >
+                    Cart
+                  </Text>
+                  <Ionicons name="cart" color={"#ffffff"} size={23} />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
     </ScrollView>

@@ -60,7 +60,10 @@ const ProfileScreen = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={profileStyle.liststyle1}>
+        <TouchableOpacity
+          style={profileStyle.liststyle1}
+          onPress={() => navigation.navigate("WishList")}
+        >
           <Ionicons name="heart" color={"#D97A2B"} size={30} />
           <Text style={[profileStyle.listtext, { color: theme.text }]}>
             My Wishlist
