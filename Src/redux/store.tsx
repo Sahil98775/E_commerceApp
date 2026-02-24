@@ -4,6 +4,7 @@ import {
   profileReducer,
   authReducer,
   favouriteReducer,
+  cartReducer,
 } from "./authSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistStore, persistReducer } from "redux-persist";
@@ -30,13 +31,17 @@ const persistedFavouriteReducer = persistReducer(
   { ...persistConfig, key: "Favourite" },
   favouriteReducer
 );
-
+const persistedCartReducer = persistReducer(
+  { ...persistConfig, key: "cart" },
+  cartReducer
+);
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
     theme: persistedThemeReducer,
     profile: persistedProfileReducer,
     favourite: favouriteReducer,
+    cart: persistedCartReducer,
   },
 
   middleware: (getDefaultMiddleware) =>

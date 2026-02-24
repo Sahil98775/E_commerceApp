@@ -20,7 +20,8 @@ import {
   getProductsByCategory,
   getLatestProducts,
 } from "../../util/ProductsApi";
-import { toggleFavourite } from "../../redux/authSlice";
+import { addToCart, toggleFavourite } from "../../redux/authSlice";
+import Review from "../../Component/Reviews";
 type Product = {
   id: number;
   title: string;
@@ -48,6 +49,8 @@ const HomeScreen = () => {
 
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
+
+  const cart = useSelector((state: RootState) => state.cart.items);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -174,6 +177,7 @@ const HomeScreen = () => {
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
             const isFavourite = favourites.some((fav) => fav.id === item.id);
+            const isCart = cart.some((c) => c.id === item.id);
             return (
               <TouchableOpacity
                 style={{
@@ -228,8 +232,12 @@ const HomeScreen = () => {
                   <Text style={{ color: "red", fontWeight: "700" }}>
                     {item.discountPercentage}% OFF
                   </Text>
-                  <TouchableOpacity>
-                    <Ionicons name="cart" color={"#D97A2B"} size={25} />
+                  <TouchableOpacity onPress={() => dispatch(addToCart(item))}>
+                    <Ionicons
+                      name={isCart ? "checkbox" : "cart"}
+                      color={"#D97A2B"}
+                      size={25}
+                    />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
@@ -250,6 +258,7 @@ const HomeScreen = () => {
           }}
           renderItem={({ item }) => {
             const isFavourite = favourites.some((fav) => fav.id === item.id);
+            const isCart = cart.some((fav) => fav.id === item.id);
             return (
               <TouchableOpacity
                 style={{
@@ -329,18 +338,23 @@ const HomeScreen = () => {
                     borderColor: "#FFFFFF",
                     marginTop: 15,
                   }}
+                  onPress={() => dispatch(addToCart(item))}
                 >
                   <Text
                     style={{
-                      fontSize: 15,
+                      fontSize: 20,
                       fontWeight: "600",
                       marginRight: 7,
                       color: "#FFFFFF",
                     }}
                   >
-                    Cart
+                    {isCart ? null : "Cart"}
                   </Text>
-                  <Ionicons name="cart" color={"#ffffff"} size={23} />
+                  <Ionicons
+                    name={isCart ? "checkmark" : "cart"}
+                    color={"#ffffff"}
+                    size={23}
+                  />
                 </TouchableOpacity>
               </TouchableOpacity>
             );

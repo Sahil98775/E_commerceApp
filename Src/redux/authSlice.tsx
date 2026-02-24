@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
+import { Alert } from "react-native";
 type User = {
   username: string;
   password: string;
@@ -35,7 +35,7 @@ const initialProfileState: ProfileState = {
   image: null,
 };
 
-type FavouriteItem = {
+type favItem = {
   id: number;
   title: string;
   price: number;
@@ -46,16 +46,35 @@ type FavouriteItem = {
   stock: number;
   availabilityStatus: string;
   weight: number;
+  shippingInformation: string;
 };
 
 interface FavouriteState {
-  items: FavouriteItem[];
+  items: favItem[];
 }
 
 const initialFavouriteState: FavouriteState = {
   items: [],
 };
+type cartItem = {
+  id: number;
+  title: string;
+  thumbnail: string;
+  price: number;
+  availabilityStatus: string;
+  warrantyInformation: string;
+  shippingInformation: string;
+  quantity: number;
+  subPrice: number;
+};
 
+interface CartState {
+  items: cartItem[];
+}
+
+const initialCartState: CartState = {
+  items: [],
+};
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -112,14 +131,14 @@ const favouriteSlice = createSlice({
   name: "favourite",
   initialState: initialFavouriteState,
   reducers: {
-    addToFavourites: (state, action: PayloadAction<FavouriteItem>) => {
+    addToFavourites: (state, action: PayloadAction<favItem>) => {
       state.items.push(action.payload);
     },
     removeFromFavourites: (state, action) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
     },
 
-    toggleFavourite: (state, action: PayloadAction<FavouriteItem>) => {
+    toggleFavourite: (state, action: PayloadAction<favItem>) => {
       const existingItem = state.items.find(
         (item) => item.id === action.payload.id
       );
@@ -130,6 +149,46 @@ const favouriteSlice = createSlice({
       } else {
         state.items.push(action.payload);
       }
+    },
+  },
+});
+
+const cartSlice = createSlice({
+  name: "cart",
+  initialState: initialCartState,
+  reducers: {
+    addToCart: (state, action: PayloadAction<cartItem>) => {
+      const existingItem = state.items.find(
+        (item) => item.id === action.payload.id
+      );
+      if (existingItem) {
+        state.items = state.items.filter(
+          (item) => item.id !== action.payload.id
+        );
+      } else {
+        state.items.push({
+          ...action.payload,
+          quantity: 1,
+          subPrice: action.payload.price,
+        });
+      }
+    },
+    incrementCart: (state, action: PayloadAction<cartItem>) => {
+      const item = state.items.find((item) => item.id === action.payload.id);
+      if (item) {
+        item.quantity += 1;
+        item.subPrice = item.price * item.quantity;
+      }
+    },
+    decrementCart: (state, action: PayloadAction<number>) => {
+      const item = state.items.find((item) => item.id === action.payload);
+      if (item && item.quantity > 1) {
+        item.quantity -= 1;
+        item.subPrice = item.price * item.quantity;
+      }
+    },
+    removeFromCart: (state, action: PayloadAction<number>) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
     },
   },
 });
@@ -146,3 +205,8 @@ export const profileReducer = profileSlice.reducer;
 export const { addToFavourites, removeFromFavourites, toggleFavourite } =
   favouriteSlice.actions;
 export const favouriteReducer = favouriteSlice.reducer;
+
+export const { addToCart, incrementCart, decrementCart, removeFromCart } =
+  cartSlice.actions;
+
+export const cartReducer = cartSlice.reducer;

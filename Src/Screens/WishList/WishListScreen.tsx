@@ -36,6 +36,7 @@ const WishlistScreen = () => {
   const favourites = useSelector((state: RootState) => state.favourite.items);
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
+  const cart = useSelector((state: RootState) => state.cart.items);
   return (
     <View
       style={{
@@ -144,9 +145,10 @@ const WishlistScreen = () => {
                 >
                   {item.discountPercentage}% OFF
                 </Text>
+
                 <Text
                   style={{
-                    marginTop: 20,
+                    marginTop: 8,
                     fontSize: 20,
                     fontWeight: 600,
                     color: item.stock === 0 ? "red" : "green",
@@ -154,14 +156,17 @@ const WishlistScreen = () => {
                 >
                   {item.availabilityStatus}
                 </Text>
-                <Text
-                  style={{
-                    color: item.stock < 10 ? "red" : "#333",
-                    fontWeight: item.stock < 10 ? "600" : "400",
-                  }}
-                >
-                  Only {item.stock} left
-                </Text>
+                {item.stock > 0 && (
+                  <Text
+                    style={{
+                      color: item.stock < 10 ? "red" : "#333",
+                      fontWeight: item.stock < 10 ? "600" : "400",
+                    }}
+                  >
+                    Only {item.stock} left
+                  </Text>
+                )}
+
                 <TouchableOpacity
                   style={{
                     flexDirection: "row",
@@ -190,6 +195,19 @@ const WishlistScreen = () => {
                   <Ionicons name="cart" color={"#ffffff"} size={23} />
                 </TouchableOpacity>
               </View>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: "#c23b22",
+                  position: "absolute",
+                  marginTop: 10,
+                  bottom: 4,
+                  left: 8,
+                }}
+              >
+                *{item.shippingInformation}
+              </Text>
             </TouchableOpacity>
           )}
         />

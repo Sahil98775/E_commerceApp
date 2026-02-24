@@ -13,8 +13,9 @@ const BottomTab = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
   const favourites = useSelector((state: RootState) => state.favourite.items);
-
+  const cart = useSelector((state: RootState) => state.cart.items);
   const wishlistCount = favourites.length;
+  const cartCount = cart.length;
 
   return (
     <Tab.Navigator
@@ -43,7 +44,13 @@ const BottomTab = () => {
         component={HomeScreen}
         options={{
           headerTitle: () => (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <Text
                 style={{
                   fontSize: 32,
@@ -74,7 +81,13 @@ const BottomTab = () => {
         component={CartScreen}
         options={{
           headerTitle: () => (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <Text
                 style={{
                   fontSize: 32,
@@ -87,7 +100,7 @@ const BottomTab = () => {
               </Text>
               <Ionicons
                 name="cart"
-                size={28}
+                size={32}
                 color="#DD7500"
                 style={{ marginRight: 6 }}
               />
@@ -95,7 +108,36 @@ const BottomTab = () => {
           ),
           headerTitleAlign: "center",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="cart" color={color} size={33} />
+            <View style={{ width: 30, height: 30 }}>
+              <Ionicons name="cart" color={color} size={30} />
+
+              {cartCount > 0 && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -5,
+                    right: -10,
+                    backgroundColor: "red",
+                    borderRadius: 10,
+                    minWidth: 18,
+                    height: 18,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    paddingHorizontal: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      fontSize: 10,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </Text>
+                </View>
+              )}
+            </View>
           ),
           // back: "#E6D2B8",
         }}
@@ -118,7 +160,7 @@ const BottomTab = () => {
               </Text>
               <Ionicons
                 name="heart"
-                size={28}
+                size={32}
                 color="#DD7500"
                 style={{ marginRight: 6 }}
               />
@@ -176,8 +218,8 @@ const BottomTab = () => {
                 MyProfile
               </Text>
               <Ionicons
-                name="cart"
-                size={28}
+                name="person"
+                size={32}
                 color="#DD7500"
                 style={{ marginRight: 6 }}
               />
