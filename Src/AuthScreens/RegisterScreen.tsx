@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { register } from "../redux/authSlice";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
+import { Ionicons } from "@expo/vector-icons";
 
 const RegisterScreen = ({ navigation }: any) => {
   const dispatch = useDispatch();
@@ -74,41 +75,40 @@ const RegisterScreen = ({ navigation }: any) => {
     <View
       style={{
         flex: 1,
-        padding: 20,
+        padding: 40,
         justifyContent: "flex-start",
         alignItems: "center",
-
-        backgroundColor: "#FAFAFA",
+        backgroundColor: "#FFE0BD",
       }}
     >
-      <Image
-        source={{
-          uri: "https://cdn-icons-png.freepik.com/256/16939/16939342.png?semt=ais_white_label",
-        }}
-        style={{ height: 200, width: 200, margin: 15 }}
-      />
-      <Text
-        style={{
-          fontSize: 30,
-          fontWeight: "bold",
-          marginBottom: 60,
-          color: "#3B82F6",
-        }}
-      >
-        SIGN IN
-      </Text>
+      <View style={{ alignItems: "center", marginTop: 20 }}>
+        <Ionicons name="rocket" size={120} color={"#D96A00"} />
+        <Text
+          style={{
+            fontSize: 30,
+            fontWeight: "bold",
+            marginBottom: 60,
+            color: "#000000",
+          }}
+        >
+          SIGN IN
+        </Text>
+      </View>
 
       <TextInput
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
         style={{
-          borderWidth: 3,
+          borderWidth: 1,
           borderColor: "#E2E8F0",
           padding: 12,
           marginBottom: 25,
           borderRadius: 8,
           width: "100%",
+          backgroundColor: "#F5F2ED",
+          elevation: 3,
+          marginTop: 10,
         }}
       />
 
@@ -118,12 +118,14 @@ const RegisterScreen = ({ navigation }: any) => {
         value={password}
         onChangeText={setPassword}
         style={{
-          borderWidth: 3,
+          borderWidth: 1,
           borderColor: "#E2E8F0",
           padding: 12,
           marginBottom: 25,
           borderRadius: 8,
           width: "100%",
+          backgroundColor: "#F5F2ED",
+          elevation: 3,
         }}
       />
 
@@ -133,12 +135,14 @@ const RegisterScreen = ({ navigation }: any) => {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         style={{
-          borderWidth: 3,
+          borderWidth: 1,
           padding: 12,
           marginBottom: 80,
           borderRadius: 8,
           width: "100%",
           borderColor: "#E2E8F0",
+          backgroundColor: "#F5F2ED",
+          elevation: 3,
         }}
       />
 
@@ -149,9 +153,9 @@ const RegisterScreen = ({ navigation }: any) => {
       <TouchableOpacity
         onPress={handleRegister}
         style={{
-          backgroundColor: "#43a400",
+          backgroundColor: "#DD7500",
           padding: 15,
-          borderRadius: 8,
+          borderRadius: 18,
           alignItems: "center",
           width: "50%",
           borderWidth: 3,

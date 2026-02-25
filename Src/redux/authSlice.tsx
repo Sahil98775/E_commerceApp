@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Alert } from "react-native";
+import { Product } from "../util/productype";
 type User = {
   username: string;
   password: string;
@@ -26,6 +26,17 @@ type ProfileState = {
   address: string;
   image: string | null;
 };
+// interface ProfileState {
+//   profiles: {
+//     [username: string]: {
+//       name: string;
+//       email: string;
+//       phoneNumber: string;
+//       address: string;
+//       image: string | null;
+//     };
+//   };
+// }
 
 const initialProfileState: ProfileState = {
   name: "",
@@ -34,23 +45,12 @@ const initialProfileState: ProfileState = {
   address: "",
   image: null,
 };
-
-type favItem = {
-  id: number;
-  title: string;
-  price: number;
-  discountPercentage: number;
-  thumbnail: string;
-  description: string;
-  rating: number;
-  stock: number;
-  availabilityStatus: string;
-  weight: number;
-  shippingInformation: string;
-};
+// const initialProfileState: ProfileState = {
+//   profiles: {},
+// };
 
 interface FavouriteState {
-  items: favItem[];
+  items: Product[];
 }
 
 const initialFavouriteState: FavouriteState = {
@@ -62,7 +62,6 @@ type cartItem = {
   thumbnail: string;
   price: number;
   availabilityStatus: string;
-  warrantyInformation: string;
   shippingInformation: string;
   quantity: number;
   subPrice: number;
@@ -71,10 +70,18 @@ type cartItem = {
 interface CartState {
   items: cartItem[];
 }
+// interface CartState {
+//   carts: {
+//     [username: string]: cartItem[];
+//   };
+// }
 
 const initialCartState: CartState = {
   items: [],
 };
+// const initialCartState: CartState = {
+//   carts: {},
+// };
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -88,7 +95,6 @@ const authSlice = createSlice({
         state.registeredUsers.push(action.payload);
       }
     },
-
     login: (state, action: PayloadAction<{ username: string }>) => {
       state.isAuthenticated = true;
       state.user = {
@@ -96,6 +102,10 @@ const authSlice = createSlice({
         password: "",
       };
     },
+    // login: (state, action: PayloadAction<User>) => {
+    //   state.isAuthenticated = true;
+    //   state.user = action.payload;
+    // },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
@@ -126,19 +136,39 @@ const profileSlice = createSlice({
     },
   },
 });
-
+// const profileSlice = createSlice({
+//   name: "profile",
+//   initialState: initialProfileState,
+//   reducers: {
+//     setProfile: (
+//       state,
+//       action: PayloadAction<{
+//         username: string;
+//         profile: {
+//           name: string;
+//           email: string;
+//           phoneNumber: string;
+//           address: string;
+//           image: string | null;
+//         };
+//       }>
+//     ) => {
+//       state.profiles[action.payload.username] = action.payload.profile;
+//     },
+//   },
+// });
 const favouriteSlice = createSlice({
   name: "favourite",
   initialState: initialFavouriteState,
   reducers: {
-    addToFavourites: (state, action: PayloadAction<favItem>) => {
+    addToFavourites: (state, action: PayloadAction<Product>) => {
       state.items.push(action.payload);
     },
     removeFromFavourites: (state, action) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
     },
 
-    toggleFavourite: (state, action: PayloadAction<favItem>) => {
+    toggleFavourite: (state, action: PayloadAction<Product>) => {
       const existingItem = state.items.find(
         (item) => item.id === action.payload.id
       );
@@ -157,24 +187,46 @@ const cartSlice = createSlice({
   name: "cart",
   initialState: initialCartState,
   reducers: {
-    addToCart: (state, action: PayloadAction<cartItem>) => {
+    addToCart: (state, action: PayloadAction<Product>) => {
       const existingItem = state.items.find(
         (item) => item.id === action.payload.id
       );
+
       if (existingItem) {
-        state.items = state.items.filter(
-          (item) => item.id !== action.payload.id
-        );
+        existingItem.quantity += 1;
+        existingItem.subPrice = existingItem.price * existingItem.quantity;
       } else {
         state.items.push({
-          ...action.payload,
+          id: action.payload.id,
+          title: action.payload.title,
+          thumbnail: action.payload.thumbnail,
+          price: action.payload.price,
+          availabilityStatus: action.payload.availabilityStatus,
+          shippingInformation: action.payload.shippingInformation,
           quantity: 1,
           subPrice: action.payload.price,
         });
       }
     },
-    incrementCart: (state, action: PayloadAction<cartItem>) => {
-      const item = state.items.find((item) => item.id === action.payload.id);
+    // addToCart: (state, action: PayloadAction<cartItem>) => {
+    //   const existingItem = state.items.find(
+    //     (item) => item.id === action.payload.id
+    //   );
+    //   if (existingItem) {
+    //     state.items = state.items.filter(
+    //       (item) => item.id !== action.payload.id
+    //     );
+    //   } else {
+    //     state.items.push({
+    //       ...action.payload,
+    //       quantity: 1,
+    //       subPrice: action.payload.price,
+    //     });
+    //   }
+    // },
+
+    incrementCart: (state, action: PayloadAction<number>) => {
+      const item = state.items.find((item) => item.id === action.payload);
       if (item) {
         item.quantity += 1;
         item.subPrice = item.price * item.quantity;
@@ -190,8 +242,72 @@ const cartSlice = createSlice({
     removeFromCart: (state, action: PayloadAction<number>) => {
       state.items = state.items.filter((item) => item.id !== action.payload);
     },
+    clearCart: (state) => {
+      state.items = [];
+    },
+    toggleCart: (state, action: PayloadAction<Product>) => {
+      const existingItem = state.items.find(
+        (item) => item.id === action.payload.id
+      );
+
+      if (existingItem) {
+        // remove if already exists
+        state.items = state.items.filter(
+          (item) => item.id !== action.payload.id
+        );
+      } else {
+        // add if not exists
+        state.items.push({
+          id: action.payload.id,
+          title: action.payload.title,
+          thumbnail: action.payload.thumbnail,
+          price: action.payload.price,
+          availabilityStatus: action.payload.availabilityStatus,
+          shippingInformation: action.payload.shippingInformation,
+          quantity: 1,
+          subPrice: action.payload.price,
+        });
+      }
+    },
   },
 });
+type Order = {
+  id: string; // unique order id
+  items: cartItem[];
+  totalAmount: number;
+  date: string;
+};
+
+interface OrdersState {
+  orders: Order[];
+}
+
+const initialOrdersState: OrdersState = {
+  orders: [],
+};
+
+const ordersSlice = createSlice({
+  name: "orders",
+  initialState: initialOrdersState,
+  reducers: {
+    placeOrder: (state, action: PayloadAction<cartItem[]>) => {
+      const newOrder: Order = {
+        id: Date.now().toString(),
+        items: action.payload,
+        totalAmount: action.payload.reduce(
+          (sum, item) => sum + item.subPrice,
+          0
+        ),
+        date: new Date().toISOString(),
+      };
+
+      state.orders.push(newOrder);
+    },
+  },
+});
+
+export const { placeOrder } = ordersSlice.actions;
+export const ordersReducer = ordersSlice.reducer;
 
 export const { register, login, logout } = authSlice.actions;
 export const authReducer = authSlice.reducer;
@@ -206,7 +322,13 @@ export const { addToFavourites, removeFromFavourites, toggleFavourite } =
   favouriteSlice.actions;
 export const favouriteReducer = favouriteSlice.reducer;
 
-export const { addToCart, incrementCart, decrementCart, removeFromCart } =
-  cartSlice.actions;
+export const {
+  addToCart,
+  incrementCart,
+  decrementCart,
+  removeFromCart,
+  toggleCart,
+  clearCart,
+} = cartSlice.actions;
 
 export const cartReducer = cartSlice.reducer;

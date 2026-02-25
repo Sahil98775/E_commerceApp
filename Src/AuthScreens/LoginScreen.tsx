@@ -67,12 +67,14 @@ const LoginScreen = () => {
 
   return (
     <View style={logStyles.container}>
-      <Image
-        source={{
-          uri: "https://cdn-icons-png.flaticon.com/512/295/295128.png",
-        }}
-        style={{ height: 200, width: 200, margin: 120 }}
-      />
+      <View style={{ alignItems: "center", margin: 50 }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ fontSize: 50, fontWeight: "700" }}>FastKet</Text>
+          <Ionicons name="rocket" color={"#D97A2B"} size={40} />
+        </View>
+        <Text>Fast and Reliable E-commerce site</Text>
+      </View>
+
       <TextInput
         value={username}
         onChangeText={(text) => {
@@ -137,7 +139,7 @@ const LoginScreen = () => {
       <TouchableOpacity>
         <Text
           style={{
-            color: "#24A0ED",
+            color: "#D96A00",
             fontSize: 18,
             fontWeight: "400",
             padding: 10,

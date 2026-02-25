@@ -1,13 +1,4 @@
-import {
-  View,
-  Text,
-  ActivityIndicator,
-  FlatList,
-  StyleSheet,
-  Image,
-  Pressable,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { lightTheme, darkTheme } from "../../util/theme";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,10 +16,11 @@ const CartScreen = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
   const cart = useSelector((state: RootState) => state.cart.items);
+  // const cart = useSelector((state: RootState) =>
+  //   state.cart.items.filter((item) => item && typeof item.id === "number")
+  // );
 
-  const subTotal = cart.reduce((acc, items) => {
-    return acc + items.price * items.quantity;
-  }, 0);
+  const subTotal = cart.reduce((acc, item) => acc + (item.subPrice ?? 0), 0);
 
   return (
     <View
@@ -62,7 +54,7 @@ const CartScreen = () => {
         <View>
           <FlatList
             data={cart}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item, index) => String(item?.id ?? index)}
             renderItem={({ item }) => (
               <View
                 style={{
@@ -109,7 +101,7 @@ const CartScreen = () => {
                         color: "#DD7500",
                       }}
                     >
-                      ${Math.ceil(item.subPrice)}
+                      ${item.subPrice.toFixed(2)}
                     </Text>
                   </View>
                   <Text
@@ -155,10 +147,21 @@ const CartScreen = () => {
                       }}
                     >
                       <TouchableOpacity
-                        onPress={() => dispatch(incrementCart(item))}
+                        style={{ marginTop: 10 }}
+                        onPress={() => dispatch(removeFromCart(item.id))}
                       >
                         <Ionicons
-                          name="add-circle"
+                          name="trash-outline"
+                          color={"grey"}
+                          size={27}
+                          style={{ paddingBottom: 10 }}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => dispatch(decrementCart(item.id))}
+                      >
+                        <Ionicons
+                          name="remove-circle"
                           color={"#D97A2B"}
                           size={27}
                         />
@@ -173,27 +176,18 @@ const CartScreen = () => {
                       >
                         {item.quantity}
                       </Text>
+
                       <TouchableOpacity
-                        onPress={() => dispatch(decrementCart(item.id))}
+                        onPress={() => dispatch(incrementCart(item.id))}
                       >
                         <Ionicons
-                          name="remove-circle"
+                          name="add-circle"
                           color={"#D97A2B"}
                           size={27}
                         />
                       </TouchableOpacity>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    style={{ marginTop: 10 }}
-                    onPress={() => dispatch(removeFromCart(item.id))}
-                  >
-                    <Text
-                      style={{ color: "grey", fontSize: 16, fontWeight: "400" }}
-                    >
-                      remove
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               </View>
             )}

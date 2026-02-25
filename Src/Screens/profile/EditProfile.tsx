@@ -6,31 +6,32 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { RootState, store } from "../../redux/store";
+import { RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setProfile } from "../../redux/authSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { lightTheme, darkTheme } from "../../util/theme";
-
 import * as ImagePicker from "expo-image-picker";
 
 const Edits = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [address, setAddress] = useState("");
-  const [image, setImage] = useState<string | null>(null);
-  const [err, setErr] = useState("");
-
   const navigation = useNavigation<any>();
-
   const dispatch = useDispatch();
+
   const profile = useSelector((state: RootState) => state.profile);
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
-  //------------------------------------------------------------------------------
+
+  const [name, setName] = useState(profile.name || "");
+  const [email, setEmail] = useState(profile.email || "");
+  const [phoneNumber, setPhoneNumber] = useState(profile.phoneNumber || "");
+  const [address, setAddress] = useState(profile.address || "");
+  const [image, setImage] = useState<string | null>(profile.image || null);
+  const [err, setErr] = useState("");
+
+  // ----------------------------------------------------------
+
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -51,152 +52,139 @@ const Edits = () => {
     }
   };
 
+  // ----------------------------------------------------------
+
   const handleEdits = () => {
     setErr("");
 
-    if (!name.trim()) {
-      setErr("Please Enter Name");
-      return;
-    }
-    if (!email.trim()) {
-      setErr("Please Enter the Email");
-      return;
-    }
-    if (!phoneNumber.trim()) {
-      setErr("Please Enter the PhoneNumber");
-      return;
-    }
-    if (!address.trim()) {
-      setErr("Please Enter the Address");
-      return;
-    }
-    if (name.length > 30) {
-      setErr("You have Exceeded the Spacelimit");
-    }
+    // Name validation
+    if (!name.trim()) return setErr("Please Enter Name");
+    if (name.length > 30) return setErr("Name too long");
+    if (!/^[A-Za-z\s]+$/.test(name))
+      return setErr("Only Alphabets are Permitted");
 
-    const nameregexp = /^[A-Za-z]/;
-    if (!nameregexp.test(name)) {
-      setErr("Only Alphabets are Permitted");
-    }
-
+    // Email validation
     const emailregexp = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
-    if (!emailregexp.test(email)) {
-      setErr("Please enter the valid Email Id");
-    }
+    if (!email.trim()) return setErr("Please Enter Email");
+    if (!emailregexp.test(email)) return setErr("Please enter valid Email Id");
 
+    // Phone validation (Indian)
     const indianPhoneRegex = /^(?:\+91|0)?[6-9]\d{9}$/;
-    if (!indianPhoneRegex.test(phoneNumber)) {
-      setErr("Please Enter the Valid PhoneNumber");
-    }
+    if (!phoneNumber.trim()) return setErr("Please Enter PhoneNumber");
+    if (!indianPhoneRegex.test(phoneNumber))
+      return setErr("Please Enter Valid PhoneNumber");
 
-    if (address.length > 50) {
-      setErr("You Have Exceeded the Spacelimit");
-    }
+    // Address validation
+    if (!address.trim()) return setErr("Please Enter Address");
+    if (address.length > 100) return setErr("Address too long");
 
-    dispatch(setProfile({ name, email, phoneNumber, address, image }));
+    dispatch(
+      setProfile({
+        name,
+        email,
+        phoneNumber,
+        address,
+        image,
+      })
+    );
+
     navigation.navigate("BottomTab", {
       screen: "Profile",
     });
   };
+
+  // ----------------------------------------------------------
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        alignItems: "center",
-        backgroundColor: theme.background,
-      }}
-    >
-      <View
-        style={{
-          backgroundColor: theme.card,
-          borderRadius: 20,
-          margin: 20,
-          padding: 20,
-          width: "95%",
-          alignItems: "center",
-        }}
-      >
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.card, { backgroundColor: theme.card }]}>
+        {/* Profile Image */}
         <View style={styles.profilepic}>
-          {image ? (
-            <Image
-              source={{ uri: image }}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: 75,
-              }}
-            />
-          ) : (
-            <Image
-              source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4GxnI2bOzOAQ9NpRvvHCkHQBXFQriXj8pgg&s",
-              }}
-              style={{
-                width: "100%",
-                height: "100%",
-                borderRadius: 75,
-              }}
-            />
-            // <Ionicons name="person" size={80} color="#DD7500" />
-          )}
-          <TouchableOpacity
-            style={{ position: "absolute", bottom: 0, right: 0 }}
-            onPress={pickImage}
-          >
-            <Ionicons name="camera" color={"#DD7500"} size={45} />
+          <Image
+            source={{
+              uri:
+                image ||
+                "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4GxnI2bOzOAQ9NpRvvHCkHQBXFQriXj8pgg&s",
+            }}
+            style={styles.image}
+          />
+          <TouchableOpacity style={styles.cameraIcon} onPress={pickImage}>
+            <Ionicons name="camera" color={"#DD7500"} size={40} />
           </TouchableOpacity>
         </View>
 
+        {/* Inputs */}
         <TextInput
-          placeholder={profile.name ?? "Your Name"}
+          placeholder="Your Name"
           value={name}
           onChangeText={setName}
-          style={styles.Textput}
-        ></TextInput>
+          style={styles.input}
+        />
 
         <TextInput
+          placeholder="Email"
           value={email}
           onChangeText={setEmail}
-          style={styles.Textput}
-          placeholder={profile.email ?? "email"}
-        ></TextInput>
+          style={styles.input}
+          keyboardType="email-address"
+        />
 
         <TextInput
+          placeholder="Phone Number"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
-          style={styles.Textput}
-          placeholder={profile.phoneNumber ?? "PhoneNumber"}
-        ></TextInput>
+          style={styles.input}
+          keyboardType="number-pad"
+        />
 
         <Text style={styles.addText}>Address</Text>
+
         <TextInput
+          placeholder="Address Details"
           value={address}
           onChangeText={setAddress}
-          style={styles.Textput1}
-          placeholder={profile.address ?? "Address Details"}
-          multiline={true}
+          style={styles.inputArea}
+          multiline
           numberOfLines={4}
-        ></TextInput>
+        />
 
         <TouchableOpacity style={styles.submitBut} onPress={handleEdits}>
           <Text style={styles.submitText}>Submit</Text>
         </TouchableOpacity>
 
         {err ? (
-          <Text style={{ color: "red", marginLeft: 10 }}>{err}</Text>
+          <Text style={styles.error}>{err}</Text>
         ) : (
-          <Text style={{ color: theme.text, marginLeft: 10 }}>
-            Every Block is Compulsary*
+          <Text
+            style={{
+              color: theme.text,
+              marginTop: 5,
+            }}
+          >
+            Every Field is Mandatory*
           </Text>
         )}
       </View>
     </View>
   );
 };
+
 export default Edits;
 
+// ----------------------------------------------------------
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+  },
+  card: {
+    borderRadius: 20,
+    margin: 20,
+    padding: 20,
+    width: "95%",
+    alignItems: "center",
+  },
   profilepic: {
     justifyContent: "center",
     alignItems: "center",
@@ -207,43 +195,42 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#F6D8B8",
   },
-
-  Textput: {
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 75,
+  },
+  cameraIcon: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+  },
+  input: {
     width: "100%",
     height: 55,
     backgroundColor: "#ffffff",
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
-    elevation: 10,
-    shadowColor: "#DD7500",
-    shadowRadius: 4,
-    marginBottom: 25,
+    marginBottom: 20,
   },
-  Textput1: {
+  inputArea: {
     width: "100%",
     height: 120,
     backgroundColor: "#ffffff",
     borderRadius: 10,
     paddingHorizontal: 15,
-
-    textAlignVertical: "top",
-    paddingTop: 15, //multiline ke liye
-
+    paddingTop: 15,
     fontSize: 16,
-    elevation: 10,
-    shadowColor: "#DD7500",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    marginBottom: 50,
+    textAlignVertical: "top",
+    marginBottom: 30,
   },
   addText: {
-    fontSize: 20,
+    fontSize: 18,
     marginBottom: 10,
     color: "#DD7500",
-    fontWeight: "800",
-    paddingLeft: 5,
+    fontWeight: "700",
+    alignSelf: "flex-start",
   },
   submitBut: {
     backgroundColor: "#DD7500",
@@ -251,23 +238,15 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     width: "50%",
-    borderWidth: 3,
-    borderColor: "#FFFFFF",
-    marginBottom: 20,
+    marginBottom: 10,
   },
   submitText: {
     color: "#FFFFFF",
     fontWeight: "600",
     fontSize: 18,
   },
+  error: {
+    color: "red",
+    marginTop: 5,
+  },
 });
-
-// photograph: {
-//     height: 250,
-//     width: "70%",
-//     borderRadius: 200,
-//     elevation: 20,
-//     shadowColor: "#D97A2B",
-//     borderWidth: 0,
-//     marginBottom: 10,
-//   },

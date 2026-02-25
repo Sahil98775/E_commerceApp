@@ -9,7 +9,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
 import { lightTheme, darkTheme } from "../util/theme";
 import ProductDetail from "../Screens/Product/ProductDetails";
-import CheckOut from "../Screens/CheckOut";
+import CheckOut from "../Screens/Cart/CheckOut";
+import Success from "../Screens/Cart/Success";
+import MyOrder from "../Screens/profile/MyOrder";
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +31,12 @@ const AppStack = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="MyOrder" component={MyOrder} />
+      <Stack.Screen
+        name="Success"
+        component={Success}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="Edits" component={Edits} />
       <Stack.Screen name="ProductDetail" component={ProductDetail} />
       <Stack.Screen

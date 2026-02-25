@@ -20,20 +20,8 @@ import {
   getProductsByCategory,
   getLatestProducts,
 } from "../../util/ProductsApi";
-import { addToCart, toggleFavourite } from "../../redux/authSlice";
-import Review from "../../Component/Reviews";
-type Product = {
-  id: number;
-  title: string;
-  price: number;
-  discountPercentage: number;
-  thumbnail: string;
-  description: string;
-  rating: number;
-  stock: number;
-  availabilityStatus: string;
-  weight: number;
-};
+import { addToCart, toggleCart, toggleFavourite } from "../../redux/authSlice";
+import { Product } from "../../util/productype";
 
 interface Category {
   slug: string;
@@ -46,11 +34,12 @@ type RootStackParamList = {
 const HomeScreen = () => {
   const dispatch = useDispatch();
   const favourites = useSelector((state: RootState) => state.favourite.items);
+  const cart = useSelector((state: RootState) => state.cart.items);
+  const favouriteIds = new Set(favourites.map((item) => item.id));
+  const cartIds = new Set(cart.map((item) => item.id));
 
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
-
-  const cart = useSelector((state: RootState) => state.cart.items);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -59,59 +48,43 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [latestProduct, setLatestProduct] = useState<Product[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handleCategoryPress = async (slug: string) => {
     try {
       setLoading(true);
       const data = await getProductsByCategory(slug);
       setProducts(data);
+      setSelectedCategory(slug);
     } catch (error) {
       console.log("Error fetching category products:", error);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getAllProduct();
-        setProducts(data);
+        setLoading(true);
+
+        const [productsData, categoriesData, latestData] = await Promise.all([
+          getAllProduct(),
+          getCategories(),
+          getLatestProducts(),
+        ]);
+
+        setProducts(productsData);
+        setCategories(categoriesData);
+        setLatestProduct(latestData);
       } catch (error) {
-        console.log("Error fetching product:", error);
+        console.log("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
 
-    //------------------------------------------------------------------
-
-    const fetchCategories = async () => {
-      try {
-        const data = await getCategories();
-        setCategories(data);
-      } catch (error) {
-        console.log("Error fetching categories", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-
-    //------------------------------------------------------------------
-    const handleLatestProducts = async () => {
-      try {
-        const data = await getLatestProducts();
-        setLatestProduct(data);
-      } catch (err) {
-        console.log("unable to fetch latest product", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    handleLatestProducts();
-
-    //------------------------------------------------------------------
+    fetchData();
   }, []);
 
   return (
@@ -131,6 +104,7 @@ const HomeScreen = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
+            const isSelected = selectedCategory === item.slug;
             return (
               <View
                 style={{
@@ -139,11 +113,12 @@ const HomeScreen = () => {
               >
                 <TouchableOpacity
                   style={{
-                    borderWidth: 2,
-                    padding: 5,
+                    borderWidth: 1,
+                    padding: 8,
                     margin: 5,
                     borderRadius: 10,
-                    borderColor: "#D97A2B",
+                    borderColor: "#FFFFFF",
+                    backgroundColor: isSelected ? "#FFFFFF" : "transparent",
                   }}
                   onPress={() => handleCategoryPress(item.slug)}
                 >
@@ -176,8 +151,8 @@ const HomeScreen = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           renderItem={({ item }) => {
-            const isFavourite = favourites.some((fav) => fav.id === item.id);
-            const isCart = cart.some((c) => c.id === item.id);
+            const isFavourite = favouriteIds.has(item.id);
+            const isCart = cartIds.has(item.id);
             return (
               <TouchableOpacity
                 style={{
@@ -232,7 +207,7 @@ const HomeScreen = () => {
                   <Text style={{ color: "red", fontWeight: "700" }}>
                     {item.discountPercentage}% OFF
                   </Text>
-                  <TouchableOpacity onPress={() => dispatch(addToCart(item))}>
+                  <TouchableOpacity onPress={() => dispatch(toggleCart(item))}>
                     <Ionicons
                       name={isCart ? "checkbox" : "cart"}
                       color={"#D97A2B"}
@@ -246,7 +221,9 @@ const HomeScreen = () => {
         />
       </View>
       <View style={[styles.allProduct, { backgroundColor: theme.product }]}>
-        <Text style={[styles.homeText, { color: theme.text }]}>Product</Text>
+        <Text style={[styles.homeText, { color: theme.text }]}>
+          {selectedCategory}
+        </Text>
         <FlatList
           key="two-columns"
           data={products}
@@ -257,8 +234,8 @@ const HomeScreen = () => {
             paddingHorizontal: 1,
           }}
           renderItem={({ item }) => {
-            const isFavourite = favourites.some((fav) => fav.id === item.id);
-            const isCart = cart.some((fav) => fav.id === item.id);
+            const isFavourite = favouriteIds.has(item.id);
+            const isCart = cartIds.has(item.id);
             return (
               <TouchableOpacity
                 style={{
@@ -317,10 +294,11 @@ const HomeScreen = () => {
                     color: "#FFFFFF",
                     fontWeight: "600",
                     backgroundColor: "red",
-                    paddingLeft: 3,
+                    paddingHorizontal: 6,
+                    paddingVertical: 2,
                     borderRadius: 5,
-                    width: "55%",
                     marginTop: 6,
+                    alignSelf: "flex-start",
                   }}
                 >
                   {item.discountPercentage}% OFF
@@ -338,7 +316,7 @@ const HomeScreen = () => {
                     borderColor: "#FFFFFF",
                     marginTop: 15,
                   }}
-                  onPress={() => dispatch(addToCart(item))}
+                  onPress={() => dispatch(toggleCart(item))}
                 >
                   <Text
                     style={{

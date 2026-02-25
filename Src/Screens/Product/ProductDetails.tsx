@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import RatingStars from "../../Component/Rating";
 import { Ionicons } from "@expo/vector-icons";
-import { addToCart, toggleFavourite } from "../../redux/authSlice";
+import { toggleCart, toggleFavourite } from "../../redux/authSlice";
 import { lightTheme, darkTheme } from "../../util/theme";
 
 const ProductDetail = () => {
@@ -17,7 +17,8 @@ const ProductDetail = () => {
   const theme = themeMode === "light" ? lightTheme : darkTheme;
 
   const cart = useSelector((state: RootState) => state.cart.items);
-
+  const cartIds = new Set(cart.map((item) => item.id));
+  const isCart = cartIds.has(product.id);
   return (
     <ScrollView style={{ padding: 18, backgroundColor: theme.background }}>
       <TouchableOpacity
@@ -142,21 +143,7 @@ const ProductDetail = () => {
           marginTop: 20,
           marginLeft: 70,
         }}
-        onPress={() =>
-          dispatch(
-            addToCart({
-              id: product.id,
-              title: product.title,
-              price: product.price,
-              thumbnail: product.thumbnail,
-              availabilityStatus: product.availabilityStatus,
-              warrantyInformation: product.warrantyInformation,
-              shippingInformation: product.shippingInformation,
-              quantity: 1,
-              subPrice: product.price,
-            })
-          )
-        }
+        onPress={() => dispatch(toggleCart(product))}
       >
         <Text
           style={{
@@ -166,9 +153,13 @@ const ProductDetail = () => {
             color: "#FFFFFF",
           }}
         >
-          Add To Cart
+          {isCart ? null : "Add to Cart"}
         </Text>
-        <Ionicons name="cart" color={"#ffffff"} size={23} />
+        <Ionicons
+          name={isCart ? "checkmark" : "cart"}
+          color={"#ffffff"}
+          size={23}
+        />
       </TouchableOpacity>
     </ScrollView>
   );

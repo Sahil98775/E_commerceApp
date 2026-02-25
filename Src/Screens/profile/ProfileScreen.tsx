@@ -6,13 +6,18 @@ import { Ionicons } from "@expo/vector-icons";
 import profileStyle from "./ProfileStyle";
 import { lightTheme, darkTheme } from "../../util/theme";
 import { RootState } from "../../redux/store";
+import MyOrder from "./MyOrder";
 
 const ProfileScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
 
   const profile = useSelector((state: RootState) => state.profile);
-
+  // const currentUser = useSelector((state: RootState) => state.auth.user);
+  // const profile = useSelector(
+  //   (state: RootState) =>
+  //     state.profile.profiles[currentUser?.username || ""] || {}
+  // );
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
 
@@ -53,7 +58,10 @@ const ProfileScreen = () => {
       <View
         style={[profileStyle.listcontainer, { backgroundColor: theme.card }]}
       >
-        <TouchableOpacity style={profileStyle.liststyle}>
+        <TouchableOpacity
+          style={profileStyle.liststyle}
+          onPress={() => navigation.navigate("MyOrder")}
+        >
           <Ionicons name="checkbox" color={"#D97A2B"} size={30} />
           <Text style={[profileStyle.listtext, { color: theme.text }]}>
             My Orders

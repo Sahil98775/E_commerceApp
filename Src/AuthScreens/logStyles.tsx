@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 const logStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f7fa",
+    backgroundColor: "#FFE0BD",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 25,
@@ -12,7 +12,7 @@ const logStyles = StyleSheet.create({
   user: {
     width: "100%",
     height: 55,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F5F2ED",
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -25,7 +25,7 @@ const logStyles = StyleSheet.create({
   passward: {
     width: "100%",
     height: 55,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F5F2ED",
     borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
@@ -38,7 +38,7 @@ const logStyles = StyleSheet.create({
   log: {
     width: "100%",
     height: 55,
-    backgroundColor: "#24A0ED",
+    backgroundColor: "#DD7500",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",

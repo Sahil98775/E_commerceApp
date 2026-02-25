@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
-import { toggleFavourite } from "../../redux/authSlice";
+import { addToCart, toggleCart, toggleFavourite } from "../../redux/authSlice";
 import { Ionicons } from "@expo/vector-icons";
 import { lightTheme, darkTheme } from "../../util/theme";
 import { useNavigation } from "@react-navigation/native";
@@ -37,6 +37,8 @@ const WishlistScreen = () => {
   const themeMode = useSelector((state: RootState) => state.theme.mode);
   const theme = themeMode === "light" ? lightTheme : darkTheme;
   const cart = useSelector((state: RootState) => state.cart.items);
+  const cartIds = new Set(cart.map((item) => item.id));
+
   return (
     <View
       style={{
@@ -63,153 +65,169 @@ const WishlistScreen = () => {
         <FlatList
           data={favourites}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                flexDirection: "row",
-                backgroundColor: theme.card,
-                padding: 10,
-                marginVertical: 5,
-                borderRadius: 10,
-                elevation: 3,
-              }}
-              onPress={() =>
-                navigation.navigate("ProductDetail", { product: item })
-              }
-            >
-              <View>
-                <TouchableOpacity
-                  onPress={() =>
-                    Alert.alert(
-                      "Remove Favourite",
-                      "Do you want to remove this item from favourites?",
-                      [
-                        {
-                          text: "Cancel",
-                          style: "cancel",
-                        },
-                        {
-                          text: "Remove",
-                          style: "destructive",
-                          onPress: () => dispatch(toggleFavourite(item)),
-                        },
-                      ]
-                    )
-                  }
-                  // onPress={() => dispatch(toggleFavourite(item))}
-                  style={{ position: "relative" }}
-                >
-                  <Ionicons name="trash" size={24} color="#D97A2B" />
-                </TouchableOpacity>
-
-                <Image
-                  source={{ uri: item.thumbnail }}
-                  style={{ width: 180, height: 200, resizeMode: "contain" }}
-                />
-              </View>
-              <View
+          renderItem={({ item }) => {
+            const isCart = cartIds.has(item.id);
+            return (
+              <TouchableOpacity
                 style={{
-                  justifyContent: "flex-start",
-                  alignItems: "flex-start",
-                  width: "53%",
-                  padding: 5,
+                  flex: 1,
+                  flexDirection: "row",
+                  backgroundColor: theme.card,
+                  padding: 10,
+                  marginVertical: 5,
+                  borderRadius: 10,
+                  elevation: 3,
                 }}
+                onPress={() =>
+                  navigation.navigate("ProductDetail", { product: item })
+                }
               >
-                <Text
-                  numberOfLines={2}
-                  style={{ fontSize: 24, fontWeight: "600", color: "#D97A2B" }}
-                >
-                  {item.title}
-                </Text>
-                <Text
-                  numberOfLines={2}
-                  style={{ fontWeight: "500", color: theme.text }}
-                >
-                  {item.description}
-                </Text>
-                <Text
-                  style={{ fontSize: 30, fontWeight: "500", color: theme.text }}
-                >
-                  ${item.price}
-                </Text>
-                <Text
-                  style={{
-                    color: "#FFFFFF",
-                    fontSize: 13,
-                    fontWeight: "500",
-                    backgroundColor: "red",
-                    padding: 3,
-                    borderRadius: 5,
-                  }}
-                >
-                  {item.discountPercentage}% OFF
-                </Text>
-
-                <Text
-                  style={{
-                    marginTop: 8,
-                    fontSize: 20,
-                    fontWeight: 600,
-                    color: item.stock === 0 ? "red" : "green",
-                  }}
-                >
-                  {item.availabilityStatus}
-                </Text>
-                {item.stock > 0 && (
-                  <Text
-                    style={{
-                      color: item.stock < 10 ? "red" : "#333",
-                      fontWeight: item.stock < 10 ? "600" : "400",
-                    }}
+                <View>
+                  <TouchableOpacity
+                    onPress={() =>
+                      Alert.alert(
+                        "Remove Favourite",
+                        "Do you want to remove this item from favourites?",
+                        [
+                          {
+                            text: "Cancel",
+                            style: "cancel",
+                          },
+                          {
+                            text: "Remove",
+                            style: "destructive",
+                            onPress: () => dispatch(toggleFavourite(item)),
+                          },
+                        ]
+                      )
+                    }
+                    // onPress={() => dispatch(toggleFavourite(item))}
+                    style={{ position: "relative" }}
                   >
-                    Only {item.stock} left
-                  </Text>
-                )}
+                    <Ionicons name="trash" size={24} color="#D97A2B" />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
+                  <Image
+                    source={{ uri: item.thumbnail }}
+                    style={{ width: 180, height: 200, resizeMode: "contain" }}
+                  />
+                </View>
+                <View
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderWidth: 2,
-                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                    width: "53%",
                     padding: 5,
-                    borderRadius: 8,
-                    backgroundColor: "#D97A2B",
-                    borderColor: "#FFFFFF",
-                    marginTop: 10,
-                    marginBottom: 15,
                   }}
                 >
                   <Text
+                    numberOfLines={2}
                     style={{
-                      fontSize: 15,
+                      fontSize: 24,
                       fontWeight: "600",
-                      marginRight: 7,
-                      color: "#FFFFFF",
+                      color: "#D97A2B",
                     }}
                   >
-                    Add to Cart
+                    {item.title}
                   </Text>
-                  <Ionicons name="cart" color={"#ffffff"} size={23} />
-                </TouchableOpacity>
-              </View>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  color: "#c23b22",
-                  position: "absolute",
-                  marginTop: 10,
-                  bottom: 4,
-                  left: 8,
-                }}
-              >
-                *{item.shippingInformation}
-              </Text>
-            </TouchableOpacity>
-          )}
+                  <Text
+                    numberOfLines={2}
+                    style={{ fontWeight: "500", color: theme.text }}
+                  >
+                    {item.description}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 30,
+                      fontWeight: "500",
+                      color: theme.text,
+                    }}
+                  >
+                    ${item.price}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 13,
+                      fontWeight: "500",
+                      backgroundColor: "red",
+                      padding: 3,
+                      borderRadius: 5,
+                    }}
+                  >
+                    {item.discountPercentage}% OFF
+                  </Text>
+
+                  <Text
+                    style={{
+                      marginTop: 8,
+                      fontSize: 20,
+                      fontWeight: 600,
+                      color: item.stock === 0 ? "red" : "green",
+                    }}
+                  >
+                    {item.availabilityStatus}
+                  </Text>
+                  {item.stock > 0 && (
+                    <Text
+                      style={{
+                        color: item.stock < 10 ? "red" : "#333",
+                        fontWeight: item.stock < 10 ? "600" : "400",
+                      }}
+                    >
+                      Only {item.stock} left
+                    </Text>
+                  )}
+
+                  <TouchableOpacity
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderWidth: 2,
+                      width: "80%",
+                      padding: 7,
+                      borderRadius: 8,
+                      backgroundColor: "#2E8B57",
+                      borderColor: "#FFFFFF",
+                      marginTop: 10,
+                      marginBottom: 15,
+                    }}
+                    onPress={() => dispatch(toggleCart(item))}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "600",
+                        marginRight: 7,
+                        color: "#FFFFFF",
+                      }}
+                    >
+                      {isCart ? null : "Add to Cart"}
+                    </Text>
+                    <Ionicons
+                      name={isCart ? "checkmark" : "cart"}
+                      color={"#ffffff"}
+                      size={23}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "#c23b22",
+                    position: "absolute",
+                    marginTop: 10,
+                    bottom: 4,
+                    left: 8,
+                  }}
+                >
+                  *{item.shippingInformation}
+                </Text>
+              </TouchableOpacity>
+            );
+          }}
         />
       )}
     </View>
